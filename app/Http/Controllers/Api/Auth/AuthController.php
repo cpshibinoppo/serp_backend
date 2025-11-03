@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -21,7 +21,6 @@ class AuthController extends Controller
         $email = $request->email;
         $password = $request->password;
 
-        // 🏠 1️⃣ Try Super Admin (central database)
         $superAdmin = User::where('email', $email)->first();
 
         if ($superAdmin && Hash::check($password, $superAdmin->password) && $superAdmin->hasRole('super_admin')) {
@@ -35,7 +34,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // 🏢 2️⃣ Try Tenant Databases
         $tenants = Tenant::all();
 
         foreach ($tenants as $tenant) {
@@ -59,7 +57,6 @@ class AuthController extends Controller
             }
         }
 
-        // ❌ Invalid credentials
         return response()->json([
             'status' => 'error',
             'message' => 'Invalid credentials'
