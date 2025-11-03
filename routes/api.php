@@ -9,7 +9,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/superadmin/login', [AuthController::class, 'superAdminLogin']);
+Route::post('/admin/login', [AuthController::class, 'tenantLogin']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::get('/check-user', function (Request $request) {

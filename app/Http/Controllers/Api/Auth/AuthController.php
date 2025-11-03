@@ -11,55 +11,79 @@ use Stancl\Tenancy\Facades\Tenancy;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function superAdminLogin(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'email'    => 'required|email',
             'password' => 'required|string|min:6',
         ]);
 
-        $email = $request->email;
-        $password = $request->password;
+        $user = User::where('email', $validated['email'])->first();
 
-        $superAdmin = User::where('email', $email)->first();
-
-        if ($superAdmin && Hash::check($password, $superAdmin->password) && $superAdmin->hasRole('super_admin')) {
-            $token = $superAdmin->createToken('superadmin-token')->plainTextToken;
+        if ($user && Hash::check($validated['password'], $user->password) && $user->hasRole('Super Admin')) {
+            $token = $user->createToken('superadmin-token')->plainTextToken;
 
             return response()->json([
                 'status' => 'success',
-                'type' => 'super_admin',
-                'user' => $superAdmin,
-                'token' => $token,
+                'type'   => 'super_admin',
+                'user'   => $user,
+                'token'  => $token,
             ]);
         }
 
-        $tenants = Tenant::all();
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Invalid super admin credentials',
+        ], 401);
+    }
 
-        foreach ($tenants as $tenant) {
-            $foundUser = null;
+    public function tenantLogin(Request $request)
+    {
+        $validated = $request->validate([
+            'tenant'   => 'required|string',
+            'email'    => 'required|email',
+            'password' => 'required|string|min:6',
+        ]);
 
-            $tenant->run(function () use (&$foundUser, $email) {
-                $foundUser = User::where('email', $email)->first(); // ✅ No tenant_id filter
-            });
+        // 🔹 1. Find tenant by identifier
+        $tenant = Tenant::where('id', $validated['tenant'])
+            ->orWhere('name', $validated['tenant'])
+            ->first();
 
-            if ($foundUser && Hash::check($password, $foundUser->password)) {
-                $token = $foundUser->createToken('tenant-token')->plainTextToken;
-
-                return response()->json([
-                    'status' => 'success',
-                    'type' => $foundUser->getRoleNames()->first() ?? 'staff',
-                    'tenant_id' => $tenant->id,
-                    'tenant_name' => $tenant->name,
-                    'user' => $foundUser,
-                    'token' => $token,
-                ]);
-            }
+        if (!$tenant) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Invalid tenant identifier'
+            ], 404);
         }
 
+        // 🔹 2. Initialize tenant context
+        Tenancy::initialize($tenant);
+
+        // 🔹 3. Authenticate user in that tenant DB
+        $user = User::where('email', $validated['email'])->first();
+
+        if ($user && Hash::check($validated['password'], $user->password)) {
+            $role  = $user->getRoleNames()->first() ?? 'staff';
+            $token = $user->createToken('tenant-token')->plainTextToken;
+
+            Tenancy::end();
+
+            return response()->json([
+                'status'      => 'success',
+                'type'        => $role,
+                'tenant_id'   => $tenant->id,
+                'tenant_name' => $tenant->name,
+                'user'        => $user,
+                'token'       => $token,
+            ]);
+        }
+
+        Tenancy::end();
+
         return response()->json([
-            'status' => 'error',
-            'message' => 'Invalid credentials'
+            'status'  => 'error',
+            'message' => 'Invalid email or password'
         ], 401);
     }
 
