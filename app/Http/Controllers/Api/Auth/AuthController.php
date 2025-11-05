@@ -20,7 +20,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $validated['email'])->first();
 
-        if ($user && Hash::check($validated['password'], $user->password) && $user->hasRole('Super Admin')) {
+        if ($user && Hash::check($validated['password'], $user->password) && $user->hasRole('Super_Admin')) {
             $token = $user->createToken('superadmin-token')->plainTextToken;
 
             return response()->json([
