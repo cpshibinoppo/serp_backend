@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\TenantRegistrationController;
+use App\Http\Controllers\Api\SuperAdmin\CouponController;
 use App\Http\Controllers\Api\SuperAdmin\PackageController;
 
 Route::get('/user', function (Request $request) {
@@ -28,4 +29,7 @@ Route::post('/tenants/register', [TenantRegistrationController::class, 'register
 
 Route::middleware(['auth:sanctum', 'role:Super_Admin'])->group(function () {
     Route::apiResource('packages', PackageController::class);
+    Route::apiResource('coupons', CouponController::class);
 });
+
+Route::post('coupons/apply', [CouponController::class, 'apply']);

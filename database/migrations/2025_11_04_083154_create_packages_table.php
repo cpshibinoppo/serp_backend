@@ -22,7 +22,6 @@ return new class extends Migration
             $table->integer('invoice_count')->default(0);
             $table->enum('interval', ['days', 'months', 'years'])->default('years');
             $table->integer('trial_days')->default(0);
-            $table->text('businesses')->nullable();
             $table->integer('created_by')->nullable();
             $table->boolean('is_active')->default(false);
             $table->boolean('mark_package_as_popular')->default(false);
