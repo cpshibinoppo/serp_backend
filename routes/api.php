@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\TenantRegistrationController;
 use App\Http\Controllers\Api\SuperAdmin\CouponController;
 use App\Http\Controllers\Api\SuperAdmin\PackageController;
+use App\Http\Controllers\Api\SuperAdmin\SettingController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -30,6 +31,8 @@ Route::post('/tenants/register', [TenantRegistrationController::class, 'register
 Route::middleware(['auth:sanctum', 'role:Super_Admin'])->group(function () {
     Route::apiResource('packages', PackageController::class);
     Route::apiResource('coupons', CouponController::class);
+    Route::get('/settings', [SettingController::class, 'index']);
+    Route::post('/settings/update', [SettingController::class, 'update']);
 });
 
 Route::post('coupons/apply', [CouponController::class, 'apply']);

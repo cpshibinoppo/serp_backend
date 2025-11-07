@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\SuperAdmin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Coupon;
+use App\Models\SuperAdmin\Coupon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\SuperAdmin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Package;
+use App\Models\SuperAdmin\Package;
 use Illuminate\Http\Request;
 
 class PackageController extends Controller
