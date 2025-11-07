@@ -27,7 +27,6 @@ class TenantRegistrationController extends Controller
 
         $tenant_key = $request->tenant_key;
 
-        // 1️⃣ Create Tenant
         $tenant = Tenant::create([
             'id' => $tenant_key,
             'name' => $request->tenant_name,
@@ -36,7 +35,6 @@ class TenantRegistrationController extends Controller
 
         $tenant->domains()->create(['domain' => $tenant_key]);
 
-        // 2️⃣ Create Admin User
         $admin = User::create([
             'name' => $request->admin_name,
             'email' => $request->admin_email,
